@@ -1,0 +1,278 @@
+
+div {
+    box-sizing: border-box;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+
+    display: flex;
+}
+
+.left {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1.2;
+    max-width: 350px;
+    max-height: 700px;
+}
+
+.right {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 10;
+}
+
+.code {
+    display: flex;
+    flex-direction: column;
+
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    margin: 10% 5% 10% 10%;
+
+    border: 2px solid;
+
+    position: relative;
+}
+
+.buttons-holder {
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+
+    width: 100%;
+    height: 5%;
+    padding-right: 10px;
+
+    gap: 10px;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 0.5;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 5px;
+    height: 100%;
+}
+
+.buttons-holder button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 10px;
+    box-sizing: border-box;
+    height: 50%;
+    border-radius: 5px;
+    border-color: rgba(40, 40, 40, 0.27);
+
+    cursor: pointer;
+}
+
+.toggles {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 0.5;
+    justify-content: flex-end;
+    align-items: center;
+
+    height: 100%;
+    box-sizing: border-box;
+
+}
+
+.toggle {
+    position: relative;
+
+    height: 75%;
+    width: 60px;
+    padding: 10px;
+    margin-left: -10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    background: #acacac;
+    border-radius: 30px;
+}
+
+.handle {
+    position: absolute;
+
+    left: 1%;
+    margin: auto 5%;
+
+    height: 75%;
+    width: 35%;
+    background: white;
+    border-radius: 30px;
+    transition: 0.4s;
+}
+
+.toggle:has(.toggle-checkbox:checked) .handle {
+    left: 50%;
+}
+
+.toggle-checkbox {
+    position: absolute;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+
+    opacity: 0;
+    cursor: pointer;
+}
+
+.code-content {
+    width: 100%;
+    height: 90%;
+
+    padding-top: 5%;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow-y: auto;
+}
+
+.code-line {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    width: 100%;
+    color: black;
+    font-family: monospace;
+    font-size: 12px;
+    padding: 2px;
+    border-bottom: 1px solid #e0e0e0;
+    background-color: #f0f0f0;
+}
+
+.code-line.active {
+    background: #408990;
+}
+
+.code-line:nth-child(even) {
+    background-color: #f8f8f8;
+}
+
+.line-number {
+    display: inline-block;
+    width: 30px;
+    text-align: left;
+    padding-right: 5px;
+    padding-left: 5px;
+    color: #888;
+}
+
+.line-content {
+    padding: 0;
+}
+
+
+.next-instruction {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 5%;
+    border: 1px solid;
+    box-shadow: inset 9px 7px 20px 0 #c3c3c375;
+}
+
+.right {
+    padding: 50px;
+
+    display: flex;
+    flex-direction: column;
+    --memory-cell-width: 25px;
+}
+
+.memory-block {
+    width: 100%;
+    height: 50px;
+
+    overflow-y: auto;
+    display: flex;
+
+    flex-direction: column;
+
+    --sp-pos: -1;
+    --loc-pos: -1;
+    --param-pos: -1;
+    --this-pos: -1;
+}
+
+.memory-content {
+    display: flex;
+    flex-direction: row;
+
+    width: 100%;
+    flex-grow: 2;
+}
+
+.memory-bottom {
+    padding-left: 2px;
+    width: 100%;
+    height: 20px;
+
+    position: relative;
+}
+
+.memory-bottom span {
+    width: var(--memory-cell-width);
+    font-size: 0.7em;
+
+    position: absolute;
+
+    text-align: center;
+}
+
+.memory-bottom span.sp-indic {
+    left: calc(var(--memory-cell-width) * var(--sp-pos));
+}
+
+.memory-bottom span.loc-indic {
+    left: calc(var(--memory-cell-width) * var(--loc-pos));
+}
+
+.memory-bottom span.param-indic {
+    left: calc(var(--memory-cell-width) * var(--param-pos));
+}
+
+.memory-bottom span.this-indic {
+    left: calc(var(--memory-cell-width) * var(--this-pos));
+}
+
+.memory-cell {
+    width: var(--memory-cell-width);
+    height: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: 1px solid;
+    border-left-width: 0;
+
+    font-family: monospace;
+    font-size: 1.2em;
+}
+
+.memory-cell:nth-child(1) {
+    border-left-width: 1px;
+}

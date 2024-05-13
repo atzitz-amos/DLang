@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <title>Debugger</title>
+    <script src="https://kit.fontawesome.com/56ede3712c.js" crossorigin="anonymous"></script>
+    <script src="js/debugger.js"></script>
+    <link rel="stylesheet" href="css/debugger.css">
+</head>
+<body>
+<div class="left">
+    <div class="code">
+        <div class="buttons-holder">
+            <div class="buttons">
+                <button class="reset"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
+                <button class="bw"><i class="fa fa-backward" aria-hidden="true"></i></button>
+                <button class="run"><i class="fa fa-play" aria-hidden="true"></i></button>
+                <button class="stop"><i class="fa fa-stop" aria-hidden="true"></i></button>
+                <button class="fw" onclick="fw()"><i class="fa fa-forward" aria-hidden="true"></i></button>
+            </div>
+            <div class="toggles">
+                <div class="toggle">
+                    <input type="checkbox" class="toggle-checkbox" onchange="changed()" checked/>
+                    <span class="handle"></span>
+                    <i class="fa fa-file-text" aria-hidden="true"></i>
+                    <i class="fa fa-code" aria-hidden="true"></i>
+                </div>
+            </div>
+        </div>
+        <div class="code-content"></div>
+        <div class="next-instruction"></div>
+    </div>
+</div>
+<div class="right">
+</div>
+</body>
+</html>

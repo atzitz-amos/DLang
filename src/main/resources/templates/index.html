@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Debugger</title>
+
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        textarea {
+            width: 50%;
+            height: 500px;
+        }
+
+        button {
+            margin-top: -10px;
+            width: 50%;
+            height: 40px;
+        }
+    </style>
+</head>
+<body>
+<label for="input">Enter text:</label>
+<textarea id="input" placeholder="Enter text to debug"></textarea>
+<button onclick="window.location.replace('/debugger?raw=' + encodeURI(document.querySelector('#input').value))">ENTER
+</button>
+</body>
+</html>
