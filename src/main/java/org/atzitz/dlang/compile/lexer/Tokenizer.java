@@ -116,20 +116,21 @@ public class Tokenizer {
                     case ']' -> TokenType.CloseBracket;
                     default -> throw new LangCompileTimeException("Unexpected character");
                 }, Location.of(src.crow(), src.ccol(), src.crow(), src.ccol() + 1));
-            } else if (c == ',' || c == ';' || c == '.') {
+            } else if (c == ',' || c == ';' || c == '.' || c == '!') {
                 var res = this.resolveIdentifiers();
                 if (res != null) return res;
                 result = new Token(String.valueOf(c), switch (c) {
                     case ',' -> TokenType.Comma;
                     case ';' -> TokenType.SemiColon;
-                    default -> TokenType.Dot;
+                    case '.' -> TokenType.Dot;
+                    default -> TokenType.ExclamationMark;
                 }, Location.of(src.crow(), src.ccol(), src.crow(), src.ccol() + 1));
             } else if (c == '\'' || c == '"') {
                 var res = this.resolveIdentifiers();
                 if (res != null) return res;
                 int n = src.find(c);
                 if (n == -1) throw new LangCompileTimeException("No closing string quote found");
-                result = new Token(src.slice(n), TokenType.String, Location.of(src.crow(), src.ccol(), src.crow(), src.ccol() + n));
+                result = new Token(src.slice(n), TokenType.Literal, Location.of(src.crow(), src.ccol(), src.crow(), src.ccol() + n));
                 src.jump(n + 1);
             } else src.save();
 

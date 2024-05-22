@@ -74,13 +74,11 @@ public class MainController {
 
     private AbstractBytecode BCfromJson(JsonNode bc) {
         return switch (bc.get("type").asInt()) {
-            case AbstractBytecode.Type.Return -> new BCReturn(bc.get("offset").asInt());
+            case AbstractBytecode.Type.LoadThis -> new BCLoadThis(bc.get("offset").asInt());
             case AbstractBytecode.Type.BinOp -> new BCBinOp(bc.get("op").asText(), bc.get("offset").asInt());
             case AbstractBytecode.Type.BuildCls ->
-                    new BCBuildCls(bc.get("id").asInt(), bc.get("nparam").asInt(), bc.get("offset").asInt());
+                    new BCBuildCls(bc.get("id").asInt(), bc.get("argc").asInt(), bc.get("localc").asInt(), bc.get("offset").asInt());
             case AbstractBytecode.Type.Compare -> new BCCompare(bc.get("op").asText(), bc.get("offset").asInt());
-            case AbstractBytecode.Type.CallFunc ->
-                    new BCCallFunc(bc.get("id").asInt(), bc.get("argc").asInt(), bc.get("offset").asInt());
             case AbstractBytecode.Type.ExchangeAssign -> {
                 int[] ids = new int[bc.get("size").asInt()];
                 int i = 0;
@@ -94,22 +92,23 @@ public class MainController {
                     new BCFuncAlloc(bc.get("until").asInt(), bc.get("pointer").asInt(), bc.get("offset").asInt());
             case AbstractBytecode.Type.FuncInit -> new BCInitFunc(bc.get("localc").asInt(), bc.get("offset").asInt());
             case AbstractBytecode.Type.InvokeFunc ->
-                    new BCInvokeFunc(bc.get("obj").asInt(), bc.get("id").asInt(), bc.get("nparam")
+                    new BCInvokeFunc(bc.get("obj").asInt(), bc.get("id").asInt(), bc.get("argc")
                             .asInt(), bc.get("offset").asInt());
             case AbstractBytecode.Type.Jump -> new BCJump(bc.get("jump").asInt(), bc.get("offset").asInt());
             case AbstractBytecode.Type.JumpIfFalse ->
                     new BCJumpIfFalse(bc.get("jump").asInt(), bc.get("offset").asInt());
-            case AbstractBytecode.Type.LoadAttr ->
-                    new BCLoadAttr(bc.get("obj").asInt(), bc.get("id").asInt(), bc.get("offset").asInt());
+            case AbstractBytecode.Type.LoadRel ->
+                    new BCLoadRel(bc.get("obj").asInt(), bc.get("id").asInt(), bc.get("offset").asInt());
             case AbstractBytecode.Type.LoadConst -> new BCLoadConst(bc.get("name").asInt(), bc.get("offset").asInt());
             case AbstractBytecode.Type.LoadDynamic -> new BCLoadDynamic(bc.get("id").asInt(), bc.get("offset").asInt());
             case AbstractBytecode.Type.LoadGlobal -> new BCLoadGlobal(bc.get("id").asInt(), bc.get("offset").asInt());
             case AbstractBytecode.Type.LoadParam -> new BCLoadParam(bc.get("id").asInt(), bc.get("offset").asInt());
-            case AbstractBytecode.Type.StoreAttr -> new BCStoreAttr(bc.get("obj").asInt(), bc.get("id").asInt(),
+            case AbstractBytecode.Type.StoreRel -> new BCStoreRel(bc.get("obj").asInt(), bc.get("id").asInt(),
                     bc.get("offset").asInt());
             case AbstractBytecode.Type.StoreDynamic ->
                     new BCStoreDynamic(bc.get("id").asInt(), bc.get("offset").asInt());
             case AbstractBytecode.Type.StoreGlobal -> new BCStoreGlobal(bc.get("id").asInt(), bc.get("offset").asInt());
+            case AbstractBytecode.Type.Return -> new BCReturn(bc.get("offset").asInt());
             default -> throw new IllegalStateException(STR."Unexpected value: \{bc.get("type").asInt()}");
         };
     }
@@ -129,6 +128,21 @@ public class MainController {
         ArrayNode memory = root.putArray("memory");
         for (int i = 0; i < debugger.getMaxSP(); i++) {
             memory.add(debugger.getMemoryAt(i));
+        }
+
+        return ResponseEntity.ok(root);
+    }
+
+    @PostMapping(value = "/debugger/api/heap", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<JsonNode> fetchHeap() {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode root = mapper.createObjectNode();
+
+        root.put("THIS", debugger.$THIS());
+
+        ArrayNode memory = root.putArray("heap");
+        for (int i = 0; i < debugger.getMaxSP(); i++) {
+            memory.add(debugger.getHeapAt(i));
         }
 
         return ResponseEntity.ok(root);

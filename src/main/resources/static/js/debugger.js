@@ -2,6 +2,7 @@ let RAW_DATA = null;
 let BYTECODE_DATA = null;
 
 let memoryBlocks = [];
+let heapBlocks = [];
 
 window.onload = async () => {
     const urlParams = window.location.search.slice(1);
@@ -25,6 +26,7 @@ window.onload = async () => {
     }).then(async response => await response.json());
     loadRaw();
     await loadMemory();
+    await loadHeap();
 
 };
 
@@ -105,6 +107,10 @@ async function requireMemory() {
     return await fetch("/debugger/api/memory", {method: "post"}).then(async response => await response.json());
 }
 
+async function requireHeap() {
+    return await fetch("/debugger/api/heap", {method: "post"}).then(async response => await response.json());
+}
+
 function createMemoryBlock(mem, i, maxWidth) {
     let block = document.createElement("div");
     block.className = "memory-block";
@@ -166,7 +172,7 @@ async function setNextInstr(PC) {
             response.json().then(
                 bytecode => {
                     document.querySelector(".code-line.active")?.classList.remove("active");
-                    document.querySelector(`.code-line:nth-child(${PC+1})`)?.classList.add("active");
+                    document.querySelector(`.code-line:nth-child(${PC + 1})`)?.classList.add("active");
                     document.querySelector(".next-instruction").innerText = bytecode.repr;
                 }
             )
@@ -200,9 +206,33 @@ async function loadMemory() {
     setIndic("--sp-pos", memoryJSON.SP, availableCells);
     setIndic("--loc-pos", memoryJSON.LOCAL, availableCells);
     setIndic("--param-pos", memoryJSON.ARG, availableCells);
-    setIndic("--this-pos", memoryJSON.THIS, availableCells);
 
     await setNextInstr(memoryJSON.PC);
+}
+
+async function loadHeap() {
+    memoryBlocks = [];
+
+    const availableWidth = document.querySelector(".right").getBoundingClientRect().width - 100;
+    const cellWidth = parseInt(window.getComputedStyle(document.querySelector(".right")).getPropertyValue("--memory-cell-width").slice(0, -2));
+    const availableCells = Math.ceil(availableWidth / cellWidth);
+
+    const heapJSON = await requireHeap();
+    const heap = heapJSON.heap;
+
+    let len = heap.length;
+    let i = 0;
+    if (len === 0) {
+        heapBlocks.push(createMemoryBlock([], 1, availableCells));
+    }
+    while (len > 0) {
+        len -= availableCells;
+        heapBlocks.push(createMemoryBlock(heap.slice(i * availableCells, i * availableCells + availableCells), i+1, availableCells));
+
+        i++;
+    }
+
+    setIndic("--this-pos", heapJSON.THIS + availableCells, availableCells);
 }
 
 /* ---------------------------------------- */
@@ -210,5 +240,6 @@ async function loadMemory() {
 function fw() {
     fetch("/debugger/api/step", {method: "post"}).then(async response => {
         await loadMemory();
+        await loadHeap();
     });
 }

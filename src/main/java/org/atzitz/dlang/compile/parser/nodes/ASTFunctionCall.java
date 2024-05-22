@@ -5,10 +5,10 @@ import org.atzitz.dlang.compile.Location;
 import java.util.List;
 
 public class ASTFunctionCall extends ASTNode {
-    public final ASTIdentifier id;
+    public final ASTNode id;
     public final List<ASTNode> params;
 
-    public ASTFunctionCall(ASTIdentifier id, List<ASTNode> params, Location location) {
+    public ASTFunctionCall(ASTNode id, List<ASTNode> params, Location location) {
         super(Type.FunctionCallStmt, location);
         this.id = id;
         this.params = params;

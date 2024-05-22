@@ -4,7 +4,7 @@ public enum TokenType {
     Identifier,
     Keyword,
     Number,
-    String,
+    Literal,
 
     Equals,
     Comparison,
@@ -21,5 +21,5 @@ public enum TokenType {
     OpenBracket,
     CloseBracket,
 
-    Dot, EOF
+    Dot, ExclamationMark, EOF
 }

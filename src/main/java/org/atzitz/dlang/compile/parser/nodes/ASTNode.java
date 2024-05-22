@@ -22,7 +22,7 @@ public abstract class ASTNode {
 
         BinOp, AssignStmt, ExchangeAssignStmt, ExchangeGroup, FuncDef, ClassDef, Parameter, Attr, AttrAssignStmt,
         FunctionCallStmt,
-        AttrFunctionCallStmt, ReturnStmt, BuildCls, Comp
+        ReturnStmt, BuildCls, Literal, UnOp, Array, Boolean, ArrayAccess, Comp
     }
 
 }

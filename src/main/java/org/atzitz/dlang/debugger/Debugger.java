@@ -46,12 +46,16 @@ public class Debugger {
         return _debugger.getMemory().getMemory()[index];
     }
 
+    public int getHeapAt(int i) {
+        return _debugger.getHeap().getAbsolute(i);
+    }
+
     public int $SP() {
         return _debugger.getMemory().$SP;
     }
 
     public int $THIS() {
-        return _debugger.getMemory().$THIS;
+        return _debugger.getHeap().$THIS;
     }
 
     public int $ARG() {

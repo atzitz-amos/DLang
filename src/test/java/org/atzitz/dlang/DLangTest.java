@@ -7,19 +7,29 @@ public class DLangTest {
     @Test
     void test() {
         ExecCompletionInfo i = DLang.exec("""
-                int fib(int n) {
-                    if (n <= 1) {
-                        return n;
+                class MyClass {
+                    int attr = 5;
+                    
+                    int getAttr() {
+                        return attr;
                     }
-                    return fib(n - 1) + fib(n - 2);
+                    
+                    int add(int a, int b) {
+                        return a + b;
+                    }
+                    
+                    int fib(int n) {
+                        if (n <= 1) {return n;}
+                        return fib(n - 1) + fib(n - 2);
+                    }
                 }
-                int i = 0;
-                while (i < 30) {
-                    fib(i);
-                    i = i + 1;
-                }
+                                
+                MyClass cls = new MyClass();
+                                
+                int x = cls.fib(40);
                 """);
-        System.out.println(i.exec().getEnv().mem.get(0));
+
+        System.out.println(i.exec().getEnv().mem.get(1));
         System.out.println(STR."\{i.executionTime()}ms");
 
     }

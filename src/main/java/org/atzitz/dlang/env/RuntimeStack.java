@@ -14,7 +14,7 @@ public class RuntimeStack {
 
     public void push(int item) {
         memory.set(memory.$SP++, item);
-        // maxSP = Math.max(maxSP, memory.$SP);
+        maxSP = Math.max(maxSP, memory.$SP);
     }
 
     public int pop() {

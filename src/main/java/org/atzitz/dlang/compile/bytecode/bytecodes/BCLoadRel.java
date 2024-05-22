@@ -3,13 +3,13 @@ package org.atzitz.dlang.compile.bytecode.bytecodes;
 import lombok.Setter;
 
 @Setter
-public class BCLoadAttr extends AbstractBytecode {
-    private final int obj;
+public class BCLoadRel extends AbstractBytecode {
+    public final int obj;
     public final int id;
     public boolean flagged = false;
 
-    public BCLoadAttr(int obj, int id, int offset) {
-        super(Type.LoadAttr, offset);
+    public BCLoadRel(int obj, int id, int offset) {
+        super(Type.LoadRel, offset);
         this.obj = obj;
         this.id = id;
     }

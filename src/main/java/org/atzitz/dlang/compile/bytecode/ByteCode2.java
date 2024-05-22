@@ -1,19 +1,10 @@
 package org.atzitz.dlang.compile.bytecode;
 
 import lombok.Getter;
-import org.atzitz.dlang.compile.bytecode.bytecodes.*;
-import org.atzitz.dlang.compile.parser.Parser;
-import org.atzitz.dlang.compile.parser.ScopeVisitor;
-import org.atzitz.dlang.compile.parser.nodes.*;
-import org.atzitz.dlang.exceptions.compile.LangCompileTimeException;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Getter
-public class ByteCode {
-    private final ASTProgram AST;
+public class ByteCode2 {
+    /*private final ASTProgram AST;
     private final String raw;
     private final Map<String, ASTDeclareStmt> declarations;
     private final Map<String, Integer> classesLocals = new HashMap<>();
@@ -35,16 +26,16 @@ public class ByteCode {
         Parser parser = new Parser("""
                 class MyClass {
                     int attr = 5;
-                    
+
                     int getAttr() {
                         return attr;
                     }
-                    
+
                     int add(int a, int b) {
                         return a + b;
                     }
                 }
-                                
+
                 MyClass cls = new MyClass();
                 """);
         parser.parse();
@@ -233,7 +224,11 @@ public class ByteCode {
 
     private List<AbstractBytecode> generateAttrAssignStmt(ASTAttrAssignStmt node) {
         // return generateAttrAssignStmt(node.getAttr().cls.name, node.getAttr().attr.name, (ASTExprStmt) node.getRight());
-        return null;
+        int label = scope.label(node.getAttr().cls.name);
+        scope.navigateTo(declarations.get(node.getAttr().cls.name).getVartype().name);
+        List<AbstractBytecode> res = joining(generate(node.getRight()), List.of(new BCStoreRel(label, scope.label(node.getAttr().attr.name), offset())));
+        scope.revert();
+        return res;
     }
 
     private List<AbstractBytecode> generateExchangeAssignStmt(ASTExchangeAssignStmt node) {
@@ -269,7 +264,11 @@ public class ByteCode {
     }
 
     private List<AbstractBytecode> generateAttr(ASTAttr node) {
-        return List.of();
+        int label = scope.label(node.cls.name);
+        scope.navigateTo(declarations.get(node.cls.name).getVartype().name);
+        AbstractBytecode res = new BCLoadRel(label, scope.label(node.attr.name), offset());
+        scope.revert();
+        return List.of(res);
     }
 
     private int offset() {
@@ -283,5 +282,5 @@ public class ByteCode {
                     \{bytecodes.stream().map(Object::toString).collect(Collectors.joining("\n\t"))}
                 ]
                 """;
-    }
+    } */
 }

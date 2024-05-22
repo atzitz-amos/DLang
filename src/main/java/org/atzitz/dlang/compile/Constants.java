@@ -30,6 +30,9 @@ public class Constants {
         public static String CLASS = _define("class");
         public static String NEW = _define("new");
         public static String RETURN = _define("return");
+
+        public static String TRUE = _define("true");
+        public static String FALSE = _define("false");
     }
 
     public static final class _Operators extends ConstantsHolder {
