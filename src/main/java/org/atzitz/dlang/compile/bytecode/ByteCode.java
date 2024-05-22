@@ -7,10 +7,7 @@ import org.atzitz.dlang.compile.parser.ScopeVisitor;
 import org.atzitz.dlang.compile.parser.nodes.*;
 import org.atzitz.dlang.exceptions.compile.LangCompileTimeException;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -19,6 +16,7 @@ public class ByteCode {
     private final ASTProgram AST;
     private final String raw;
     private final Map<String, ASTDeclareStmt> declarations;
+    private final Map<String, Integer> classesLocals = new HashMap<>();
 
     private final ScopeVisitor scope;
 
@@ -35,10 +33,19 @@ public class ByteCode {
 
     public static void main(String[] args) {
         Parser parser = new Parser("""
-                int main() {
-                    return 42;
+                class MyClass {
+                    int attr = 5;
+                    
+                    int getAttr() {
+                        return attr;
+                    }
+                    
+                    int add(int a, int b) {
+                        return a + b;
+                    }
                 }
-                int a = main();
+                                
+                MyClass cls = new MyClass();
                 """);
         parser.parse();
         System.out.println(parser.getProgram());
@@ -113,28 +120,29 @@ public class ByteCode {
         int pointer = scope.labelObj(node.getId().name);
         scope.visit(node.getId().name);
 
-        int localsNum = scope.getCurrent().getLocals().size();
+        classesLocals.put(node.getId().name, scope.getCurrent().getLocals().size() + scope.getCurrent()
+                .getLocalObjects()
+                .size());
 
         int begin = offset();
-        offset(); // Prepare BCFuncAlloc instruction and BCInitFunc instruction
 
         List<AbstractBytecode> res = generate(node.getBody());
         scope.unvisit();
-        return joining(List.of(new BCFuncAlloc(offset, pointer, begin), new BCInitFunc(localsNum, begin + 1)), res);
+        return joining(List.of(new BCFuncAlloc(offset + 2, pointer, begin)), res, List.of(new BCLoadThis(offset()), new BCReturn(offset())));
     }
 
     private List<AbstractBytecode> generateFuncDef(ASTFunctionDef node) {
         int pointer = scope.labelObj(node.getName().name);
         scope.visit(node.getName().name);
 
-        int localsNum = scope.getCurrent().getLocals().size();
+        int localsNum = scope.getCurrent().getLocals().size() + scope.getCurrent().getLocalObjects().size();
 
         int begin = offset();
         offset(); // Prepare BCFuncAlloc and BCInitFunc instructions
         List<AbstractBytecode> res = generate(node.getBody());
         scope.unvisit();
 
-        if (res.getLast().type != AbstractBytecode.Type.Return) {
+        if (res.getLast().type != AbstractBytecode.Type.LoadThis) {
             res.add(new BCLoadConst(0, offset()));
             res.add(new BCReturn(offset()));
         }
@@ -142,17 +150,19 @@ public class ByteCode {
     }
 
     private List<AbstractBytecode> generateBuildCls(ASTBuildCls node) {
-        return joining(generate(node.params), List.of(new BCBuildCls(scope.labelObj(node.cls.name), node.params.size(), offset()))); // TODO
+        return joining(generate(node.params), List.of(new BCBuildCls(scope.labelObj(node.cls.name), node.params.size(), classesLocals.get(node.cls.name), offset()))); // TODO
     }
 
     private List<AbstractBytecode> generateFunctionCall(ASTFunctionCall node) {
-        return joining(generate(node.params), List.of(new BCCallFunc(scope.labelObj(node.id.name), node.params.size(), offset())));
+        AbstractBytecode bc = new BCInvokeFunc(-1, scope.label(node.id.name), node.params.size(), offset());
+        return joining(generate(node.params), List.of(bc));
     }
 
     private List<AbstractBytecode> generateAttrFunctionCall(ASTAttrFunctionCall node) {
         int label = scope.label(node.attr.cls.name);
+        List<AbstractBytecode> params = generate(node.params);
         scope.navigateTo(declarations.get(node.attr.cls.name).getVartype().name);
-        List<AbstractBytecode> res = joining(generate(node.params), List.of(new BCInvokeFunc(label, scope.labelObj(node.attr.attr.name), node.params.size(), offset())));
+        List<AbstractBytecode> res = joining(params, List.of(new BCInvokeFunc(label, scope.labelObj(node.attr.attr.name), node.params.size(), offset())));
         scope.revert();
         return res;
     }
@@ -186,10 +196,18 @@ public class ByteCode {
 
     private List<AbstractBytecode> generateDeclareStmt(ASTDeclareStmt node) {
         if (node.getInit() != null) {
-            return joining(generate(node.getInit()), List.of(new BCStoreDynamic(scope.label(node.getName()
-                    .getName()), offset())));
+            return joining(generate(node.getInit()), generateStoreBC(node.getName().getName()));
         }
         return List.of();
+    }
+
+    private List<AbstractBytecode> generateStoreBC(String name) {
+        return List.of(switch (scope.getPropertyLevel(name)) {
+            case LOCAL -> new BCStoreDynamic(scope.label(name), offset());
+            case PARAM -> throw new LangCompileTimeException("Cannot assign to a parameter");
+            case GLOBAL -> new BCStoreGlobal(scope.label(name), offset());
+            case CLASS_LEVEL -> new BCStoreRel(-1, scope.label(name), offset());
+        });
     }
 
     private List<AbstractBytecode> generateAssignStmt(ASTAssignStmt node) {
@@ -198,13 +216,7 @@ public class ByteCode {
         }
         String name = ((ASTIdentifier) node.getLeft()).name;
         List<AbstractBytecode> right = generate(node.getRight());
-        AbstractBytecode bc = switch (scope.getPropertyLevel(name)) {
-            case LOCAL -> new BCStoreDynamic(scope.label(name), offset());
-            case PARAM -> throw new LangCompileTimeException("Cannot assign to a parameter");
-            case GLOBAL -> new BCStoreGlobal(scope.label(name), offset());
-            case CLASS_LEVEL -> new BCStoreAttr(-1, scope.label(name), offset());
-        };
-        return joining(right, List.of(bc));
+        return joining(right, generateStoreBC(name));
     }
 
 
@@ -212,7 +224,7 @@ public class ByteCode {
         // return generateAttrAssignStmt(node.getAttr().cls.name, node.getAttr().attr.name, (ASTExprStmt) node.getRight());
         int label = scope.label(node.getAttr().cls.name);
         scope.navigateTo(declarations.get(node.getAttr().cls.name).getVartype().name);
-        List<AbstractBytecode> res = joining(generate(node.getRight()), List.of(new BCStoreAttr(label, scope.label(node.getAttr().attr.name), offset())));
+        List<AbstractBytecode> res = joining(generate(node.getRight()), List.of(new BCStoreRel(label, scope.label(node.getAttr().attr.name), offset())));
         scope.revert();
         return res;
     }
@@ -241,19 +253,18 @@ public class ByteCode {
     }
 
     private List<AbstractBytecode> generateIdentifier(ASTIdentifier node) {
-        return List.of(
-                switch (scope.getPropertyLevel(node.getName())) {
-                    case LOCAL -> new BCLoadDynamic(scope.label(node.getName()), offset());
-                    case PARAM -> new BCLoadParam(scope.label(node.getName()), offset());
-                    case GLOBAL -> new BCLoadGlobal(scope.label(node.getName()), offset());
-                    case CLASS_LEVEL -> new BCLoadAttr(-1, scope.label(node.getName()), offset());
-                });
+        return List.of(switch (scope.getPropertyLevel(node.getName())) {
+            case LOCAL -> new BCLoadDynamic(scope.label(node.getName()), offset());
+            case PARAM -> new BCLoadParam(scope.label(node.getName()), offset());
+            case GLOBAL -> new BCLoadGlobal(scope.label(node.getName()), offset());
+            case CLASS_LEVEL -> new BCLoadRel(-1, scope.label(node.getName()), offset());
+        });
     }
 
     private List<AbstractBytecode> generateAttr(ASTAttr node) {
-        int label = scope.label(node.attr.name);
+        int label = scope.label(node.cls.name);
         scope.navigateTo(declarations.get(node.cls.name).getVartype().name);
-        AbstractBytecode res = new BCLoadAttr(label, scope.label(node.cls.name), offset());
+        AbstractBytecode res = new BCLoadRel(label, scope.label(node.attr.name), offset());
         scope.revert();
         return List.of(res);
     }

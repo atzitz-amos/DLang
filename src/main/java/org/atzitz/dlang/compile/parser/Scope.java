@@ -59,7 +59,7 @@ public class Scope {
         } else if (isParam(name)) {
             return params.indexOf(name);
         } else if (isLocalObj(name)) {
-            return localObjects.indexOf(name) + locals.size();
+            return localObjects.indexOf(name);
         } else {
             return 0;
         }

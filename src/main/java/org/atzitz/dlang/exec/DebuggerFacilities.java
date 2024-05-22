@@ -1,6 +1,7 @@
 package org.atzitz.dlang.exec;
 
 import lombok.RequiredArgsConstructor;
+import org.atzitz.dlang.env.RuntimeHeap;
 import org.atzitz.dlang.env.RuntimeMem;
 import org.atzitz.dlang.env.RuntimeStack;
 
@@ -26,6 +27,10 @@ public class DebuggerFacilities {
 
     public RuntimeMem getMemory() {
         return _exec.env.mem;
+    }
+
+    public RuntimeHeap getHeap() {
+        return _exec.env.heap;
     }
 
     public RuntimeStack getStack() {

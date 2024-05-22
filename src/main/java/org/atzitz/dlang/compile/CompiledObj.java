@@ -11,10 +11,14 @@ public class CompiledObj {
 
     private final @Getter ScopeVisitor scopes;
 
+    private final @Getter int globalsC;
+
 
     public CompiledObj(ByteCode bytecode) {
         this.array = bytecode.getBytecodes().toArray(AbstractBytecode[]::new);
         this.scopes = bytecode.getScope();
+
+        this.globalsC = bytecode.getScope().getRoot().getLocalObjects().size();
     }
 
     public AbstractBytecode at(int offset) {

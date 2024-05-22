@@ -5,17 +5,19 @@ import lombok.Setter;
 @Setter
 public class BCBuildCls extends AbstractBytecode {
     public final int id;
-    private final int nparam;
+    public final int argc;
+    public final int localc;
     public boolean flagged = false;
 
-    public BCBuildCls(int id, int nparam, int offset) {
+    public BCBuildCls(int id, int argc, int localc, int offset) {
         super(Type.BuildCls, offset);
         this.id = id;
-        this.nparam = nparam;
+        this.argc = argc;
+        this.localc = localc;
     }
 
     @Override
     public String toString() {
-        return STR."BCBuildCls(id=\{id}; nparam=\{nparam}; offset=\{offset});";
+        return STR."BCBuildCls(id=\{id}; nparam=\{argc}; localc=\{localc}; offset=\{offset});";
     }
 }

@@ -186,9 +186,10 @@ public class Parser {
         ASTIdentifier attr = asIdentifier(eat(TokenType.Identifier));
 
         if (seek().type() == TokenType.Equals) {
+            eat(TokenType.Equals);
             return new ASTAttrAssignStmt(new ASTAttr(cls, attr), "=", parseExpr());
         } else if (seek().type() == TokenType.OpenParen) {
-            return parseFunctionCall(new ASTAttr(cls, attr));
+            return parseAttrFunctionCall(new ASTAttr(cls, attr));
         }
         return new ASTAttr(cls, attr);
     }
@@ -239,11 +240,11 @@ public class Parser {
         Token type = eat(TokenType.Identifier);
         ASTIdentifier id = asIdentifier(eat(TokenType.Identifier));
 
-        scope.addLocal(id.name);
-
-        if (declarations.containsKey(id.name)) {
+        if (scope.exists(id.name)) {
             throw new LangCompileTimeException(STR."Variable '\{id.name}' cannot be redeclared");
         }
+
+        scope.addLocal(id.name);
 
         ASTDeclareStmt result;
         if (consumeIf(TokenType.Equals)) {
@@ -360,7 +361,7 @@ public class Parser {
         return args;
     }
 
-    private ASTNode parseFunctionCall(ASTAttr attr) {
+    private ASTNode parseAttrFunctionCall(ASTAttr attr) {
         return new ASTAttrFunctionCall(attr, parseParams(), Location.of(attr.loc, tokenizer.lookBehind().loc()));
     }
 
@@ -370,7 +371,7 @@ public class Parser {
         while (seek().type() == TokenType.Comparison) {
             Token tk = seek();
             eat(TokenType.Comparison);
-            node = new ASTComparison(node, tk.value(), parseTerm(), Location.of(begin.loc(), tokenizer.lookBehind()
+            node = new ASTComparison(node, tk.value(), parseMathExpr(), Location.of(begin.loc(), tokenizer.lookBehind()
                     .loc()));
         }
 
@@ -431,7 +432,7 @@ public class Parser {
             eat(TokenType.Dot);
             Token id2 = eat(TokenType.Identifier);
             if (seek().type() == TokenType.OpenParen)
-                return parseFunctionCall(new ASTAttr(asIdentifier(id1), asIdentifier(id2)));
+                return parseAttrFunctionCall(new ASTAttr(asIdentifier(id1), asIdentifier(id2)));
             return new ASTAttr(asIdentifier(id1), asIdentifier(id2));
         } else if (seek().type() == TokenType.OpenParen) {
             return parseFunctionCall(asIdentifier(id1));

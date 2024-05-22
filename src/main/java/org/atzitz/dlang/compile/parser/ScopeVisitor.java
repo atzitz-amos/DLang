@@ -81,10 +81,6 @@ public class ScopeVisitor {
     }
 
 
-    public boolean isLocal(String name) {
-        return current.isLocal(name);
-    }
-
     public PropertyLevel getPropertyLevel(String name) {
         Scope curr = getLocalAccessor(name, current);
         if (curr.isParam(name)) {
@@ -102,20 +98,7 @@ public class ScopeVisitor {
     }
 
     public int labelObj(String name) {
-        Scope curr = getLocalAccessor(name, current);
-        if (!curr.getLocalObjects().contains(name)) {
-            throw new LangCompileTimeException(STR."Property \{name} not found in scope");
-        }
-        int index = curr.getLocals().size();
-        for (int i = 0; i < curr.getLocalObjects().size(); i++) {
-            if (curr.getLocalObjects().get(i).equals(name)) {
-                return index;
-            }
-            navigateTo(curr.getLocalObjects().get(i));
-            index += current.getLocals().size() + 1;
-            revert();
-        }
-        return -1;
+        return getLocalAccessor(name, current).label(name);
     }
 
     private Scope getLocalAccessor(String name, Scope curr) {
@@ -134,6 +117,28 @@ public class ScopeVisitor {
 
     public void addLocalObject(String name) {
         current.addLocalObject(name);
+    }
+
+    public boolean isInClass() {
+        Scope curr = current;
+        while (curr != null) {
+            if (curr.type == Scope.Type.CLASS) {
+                return true;
+            }
+            curr = curr.parent;
+        }
+        return false;
+    }
+
+    public boolean exists(String name) {
+        Scope curr = current;
+        while (curr != null) {
+            if (curr.children.containsKey(name)) {
+                return true;
+            }
+            curr = curr.parent;
+        }
+        return false;
     }
 
 

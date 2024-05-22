@@ -6,18 +6,18 @@ import lombok.Setter;
 public class BCInvokeFunc extends AbstractBytecode {
     public final int obj;
     public final int id;
-    private final int nparam;
+    public final int argc;
     public boolean flagged = false;
 
-    public BCInvokeFunc(int obj, int id, int nparam, int offset) {
+    public BCInvokeFunc(int obj, int id, int argc, int offset) {
         super(Type.InvokeFunc, offset);
         this.obj = obj;
         this.id = id;
-        this.nparam = nparam;
+        this.argc = argc;
     }
 
     @Override
     public String toString() {
-        return STR."BCInvokeFunc(obj=\{obj}; id=\{id}; nparam=\{nparam}; offset=\{offset});";
+        return STR."BCInvokeFunc(obj=\{obj}; id=\{id}; nparam=\{argc}; offset=\{offset});";
     }
 }
