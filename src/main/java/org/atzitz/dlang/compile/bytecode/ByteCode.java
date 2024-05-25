@@ -102,9 +102,9 @@ public class ByteCode {
 
             case ASTNode.Type.ExprStmt -> generate(((ASTExprStmt) node).getContent());
 
-            case ASTNode.Type.BinOp -> generateBinOp((ASTBinOp) node);
+            case ASTNode.Type.BinOp -> generateBinOp((ASTBinaryOp) node);
             case ASTNode.Type.UnOp -> null;
-            case ASTNode.Type.Comp -> generateComp((ASTComparison) node);
+            case ASTNode.Type.Comparison -> generateComp((ASTComparison) node);
 
             case ASTNode.Type.Number -> generateNumber((ASTNumber) node);
             case ASTNode.Type.Array -> null;
@@ -168,7 +168,7 @@ public class ByteCode {
             List<ASTAttr> attrChain = new ArrayList<>();
             while (base instanceof ASTAttr attr2) {
                 attrChain.add(attr2);
-                base = attr2.cls;
+                base = attr2.parent;
             }
             int first = scope.label(((ASTIdentifier) base).getName());
 
@@ -247,7 +247,7 @@ public class ByteCode {
         return joining(right, List.of(new BCExchangeAssign(ids, node.getRightGroup().size(), offset())));
     }
 
-    private List<AbstractBytecode> generateBinOp(ASTBinOp node) {
+    private List<AbstractBytecode> generateBinOp(ASTBinaryOp node) {
         return joining(generate(node.getLeft()), generate(node.getRight()), List.of(new BCBinOp(node.getOp(), offset())));
     }
 

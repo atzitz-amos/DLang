@@ -2,7 +2,7 @@ package org.atzitz.dlang.compile.parser.nodes;
 
 import org.atzitz.dlang.compile.Location;
 
-public class ASTAssignStmt extends ASTBinOp {
+public class ASTAssignStmt extends ASTBinaryOp {
     public ASTAssignStmt(ASTNode left, String op, ASTNode right, Location loc) {
         super(left, op, right, Type.AssignStmt, loc);
     }

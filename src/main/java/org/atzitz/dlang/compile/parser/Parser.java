@@ -32,21 +32,7 @@ public class Parser {
 
     public static void main(String[] args) {
         Parser parser = new Parser("""
-                class MyClass {
-                    int attr = 5;
-                    
-                    int getAttr() {
-                        return attr;
-                    }
-                    
-                    int add(int a, int b) {
-                        return a + b;
-                    }
-                }
-                                
-                MyClass cls = new MyClass();
-                int a = cls.getAttr();
-                int y = cls.add(5, 6);
+                a.b.c[d]
                 """);
         parser.parse();
         System.out.println(parser.getProgram());
@@ -170,28 +156,10 @@ public class Parser {
                 return requireLineEnd(parseOperatorAssignmentStmt());
             } else if (seekNext().type() == TokenType.Comma) {
                 return requireLineEnd(parseExchangeAssignmentStmt());
-            } else if (seekNext().type() == TokenType.Dot) {
-                return requireLineEnd(parseAttrStmt());
-            } else if (seekNext().type() == TokenType.OpenParen) {
-                return requireLineEnd(parseFunctionCall(asIdentifier(eat(TokenType.Identifier))));
             }
 
         }
         return parseExpr();
-    }
-
-    private ASTNode parseAttrStmt() {
-        ASTIdentifier cls = asIdentifier(eat(TokenType.Identifier));
-        eat(TokenType.Dot);
-        ASTIdentifier attr = asIdentifier(eat(TokenType.Identifier));
-
-        if (seek().type() == TokenType.Equals) {
-            eat(TokenType.Equals);
-            return new ASTAttrAssignStmt(new ASTAttr(cls, attr), "=", parseExpr());
-        } else if (seek().type() == TokenType.OpenParen) {
-            return parseAttrFunctionCall(new ASTAttr(cls, attr));
-        }
-        return new ASTAttr(cls, attr);
     }
 
     private ASTNode parseFunctionDefStmt() {
@@ -361,10 +329,6 @@ public class Parser {
         return args;
     }
 
-    private ASTNode parseAttrFunctionCall(ASTAttr attr) {
-        return new ASTAttrFunctionCall(attr, parseParams(), Location.of(attr.loc, tokenizer.lookBehind().loc()));
-    }
-
     private ASTNode parseExpr() {
         Token begin = seek();
         ASTNode node = parseMathExpr();
@@ -383,7 +347,7 @@ public class Parser {
         ASTNode node = parseTerm();
         while (seek().type() == TokenType.Operator && (seek().value().equals(Constants.OPERATORS.PLUS) || seek().value()
                 .equals(Constants.OPERATORS.MINUS))) {
-            node = new ASTBinOp(node, eat(TokenType.Operator).value(), parseTerm(), Location.of(begin.loc(), tokenizer.lookBehind()
+            node = new ASTBinaryOp(node, eat(TokenType.Operator).value(), parseTerm(), Location.of(begin.loc(), tokenizer.lookBehind()
                     .loc()));
             begin = seek();
         }
@@ -398,7 +362,7 @@ public class Parser {
         while (seek().type() == TokenType.Operator && (seek().value()
                 .equals(Constants.OPERATORS.MULTIPLY) || seek().value()
                 .equals(Constants.OPERATORS.DIVIDE)) || seek().value().equals(Constants.OPERATORS.MODULO)) {
-            node = new ASTBinOp(node, eat(TokenType.Operator).value(), parseFactor(), Location.of(begin.loc(), tokenizer.lookBehind()
+            node = new ASTBinaryOp(node, eat(TokenType.Operator).value(), parseFactor(), Location.of(begin.loc(), tokenizer.lookBehind()
                     .loc()));
             begin = seek();
         }
@@ -420,23 +384,93 @@ public class Parser {
         }
     }
 
+    private ASTNode parseArray() {
+        Token begin = eat(TokenType.OpenBracket);
+        List<ASTNode> elements = new ArrayList<>();
+        while (seek().type() != TokenType.CloseBracket) {
+            if (seek().type() == TokenType.EOF) {
+                throw new LangCompileTimeException("Unexpected EOF in array declaration");
+            }
+            elements.add(parseExpr());
+            if (!consumeIf(TokenType.Comma)) {
+                break;
+            }
+        }
+        return new ASTArray(elements, Location.of(begin.loc(), eat(TokenType.CloseBracket).loc()));
+    }
+
     private ASTNode parseIdentifierGroup() {
-        if (seek().type() == TokenType.Keyword && Objects.equals(seek().value(), Constants.KEYWORDS.NEW)) {
+        Token tok = seek();
+        if (tok.type() == TokenType.ExclamationMark) {
+            eat(TokenType.SemiColon);
+            return new ASTUnaryOp("!", parseIdentifierGroup(), Location.of(tok.loc(), tokenizer.lookBehind().loc()));
+        } else if (tok.type() == TokenType.Operator && Objects.equals(tok.value(), "-")) {
+            eat(TokenType.Operator);
+            return new ASTUnaryOp("-", parseIdentifierGroup(), Location.of(tok.loc(), tokenizer.lookBehind().loc()));
+        } else if (tok.type() == TokenType.OpenParen) {
+            eat(TokenType.OpenParen);
+            ASTNode node = parseExpr();
+            eat(TokenType.CloseParen);
+            return node;
+        } else if (tok.type() == TokenType.OpenBracket) {
+            return parseArray();
+        } else if (tok.type() == TokenType.Keyword) {
             eat(TokenType.Keyword);
-            Token id = eat(TokenType.Identifier);
-            return new ASTBuildCls(asIdentifier(id), parseParams(), Location.of(id.loc(), tokenizer.lookBehind()
-                    .loc()));
+            if (tok.value().equals(Constants.KEYWORDS.NEW)) {
+                return new ASTBuildCls(asIdentifier(eat(TokenType.Identifier)), parseParams(), Location.of(tok.loc(), tokenizer.lookBehind()
+                        .loc()));
+            } else if (tok.value().equals(Constants.KEYWORDS.TRUE)) {
+                return new ASTBoolean(true, Location.of(tok.loc()));
+            } else if (tok.value().equals(Constants.KEYWORDS.FALSE)) {
+                return new ASTBoolean(false, Location.of(tok.loc()));
+            } else throw new LangCompileTimeException(STR."Unexpected keyword '\{tok.value()}'");
+        } else if (tok.type() == TokenType.Identifier || tok.type() == TokenType.Number) {
+            ASTAttr base = ASTAttr.asRoot(asIdentifier(eat(seek().type())));
+            while (seek().type() == TokenType.Dot) {
+                eat(TokenType.Dot);
+                base = new ASTAttr(base, asIdentifier(eat(TokenType.Identifier)), Location.of(base.loc, tokenizer.lookBehind()
+                        .loc()));
+            }
+            ASTNode result = base;
+            while (seek().type() == TokenType.OpenBracket || seek().type() == TokenType.OpenParen) {
+                result = parseSubscription(result);
+            }
+
+            return result;
+        } else if (tok.type() == TokenType.Literal) {
+            return parseLiteral();
+        } else {
+            throw new LangCompileTimeException(STR."Unexpected token '\{tok.value()}'");
         }
-        Token id1 = eat(TokenType.Identifier);
-        if (seek().type() == TokenType.Dot) {
-            eat(TokenType.Dot);
-            Token id2 = eat(TokenType.Identifier);
-            if (seek().type() == TokenType.OpenParen)
-                return parseAttrFunctionCall(new ASTAttr(asIdentifier(id1), asIdentifier(id2)));
-            return new ASTAttr(asIdentifier(id1), asIdentifier(id2));
-        } else if (seek().type() == TokenType.OpenParen) {
-            return parseFunctionCall(asIdentifier(id1));
+    }
+
+    private ASTNode parseSubscription(ASTNode base) {
+        if (seek().type() == TokenType.OpenParen) {
+            eat(TokenType.OpenParen);
+            List<ASTNode> params = new ArrayList<>();
+            while (seek().type() != TokenType.CloseParen) {
+                if (seek().type() == TokenType.EOF) {
+                    throw new LangCompileTimeException("Unexpected EOF in function call");
+                }
+                params.add(parseExpr());
+                if (!consumeIf(TokenType.Comma)) {
+                    break;
+                }
+            }
+            eat(TokenType.CloseParen);
+            return new ASTFunctionCall(base, params, Location.of(base.loc, tokenizer.lookBehind().loc()));
+        } else if (seek().type() == TokenType.OpenBracket) {
+            eat(TokenType.OpenBracket);
+            ASTNode index = parseExpr();
+            eat(TokenType.CloseBracket);
+            return new ASTArrayAccess(base, index, Location.of(base.loc, tokenizer.lookBehind().loc()));
         }
-        return asIdentifier(id1);
+        return base;
+    }
+
+    @NotNull
+    private ASTLiteral parseLiteral() {
+        Token tok = eat(TokenType.Literal);
+        return new ASTLiteral(tok.value(), tok.loc());
     }
 }

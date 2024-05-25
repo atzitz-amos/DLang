@@ -2,18 +2,15 @@ package org.atzitz.dlang;
 
 public class d {
     public static void main(String[] args) {
-        long m = System.currentTimeMillis();
-        int a = 0;
-        int b = 0;
-        int target = 50_000;
-        while (a <= target) {
-            while (b <= target) {
-                b = b + 1;
-            }
-            b = 0;
-            a = a + 1;
-        }
-
-        System.out.println(STR."\{(System.currentTimeMillis() - m) / 1000F}s");
+        long millis = System.currentTimeMillis();
+        System.out.println(fib(40));
+        System.out.println(STR."\{System.currentTimeMillis() - millis}ms");
     }
+
+    // Fibonacci
+    public static int fib(int n) {
+        if (n <= 1) {return n;}
+        return fib(n - 1) + fib(n - 2);
+    }
+    
 }

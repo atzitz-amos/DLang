@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class ASTExprStmt extends ASTNode {
-    private final ASTNode content;
+     final ASTNode content;
 
     public ASTExprStmt(ASTNode content) {
         super(Type.ExprStmt, content.loc);

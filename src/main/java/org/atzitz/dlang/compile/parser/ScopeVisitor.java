@@ -1,11 +1,13 @@
 package org.atzitz.dlang.compile.parser;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.atzitz.dlang.exceptions.compile.LangCompileTimeException;
 
 import java.util.Stack;
 
 @Getter
+@Setter
 public class ScopeVisitor {
     private final Stack<Scope> scopes = new Stack<>();
     private final Scope root;

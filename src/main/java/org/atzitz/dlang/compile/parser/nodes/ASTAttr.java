@@ -3,23 +3,35 @@ package org.atzitz.dlang.compile.parser.nodes;
 import org.atzitz.dlang.compile.Location;
 
 public class ASTAttr extends ASTNode {
-    public final ASTNode cls;
+    public final ASTAttr parent;
     public final ASTIdentifier attr;
 
-    public ASTAttr(ASTNode cls, ASTIdentifier attr, Location loc) {
+    public final ASTAttr base;
+    public ASTAttr child = null;
+
+    public ASTAttr(ASTAttr parent, ASTIdentifier attr, Location loc) {
         super(Type.Attr, loc);
-        this.cls = cls;
+        this.parent = parent;
         this.attr = attr;
+
+        if (this.parent == null) {
+            this.base = this;
+        } else {
+            this.base = (parent).base;
+        }
+
+        if (this.parent != null) {
+            this.parent.child = this;
+        }
+
     }
 
-    public ASTAttr(ASTIdentifier cls, ASTIdentifier attr) {
-        super(Type.Attr, Location.of(cls.loc, attr.loc));
-        this.cls = cls;
-        this.attr = attr;
+    public static ASTAttr asRoot(ASTIdentifier id) {
+        return new ASTAttr(null, id, id.loc);
     }
 
     @Override
     public String toString() {
-        return STR."\{cls}.\{attr}";
+        return STR."\{parent}.\{attr}";
     }
 }

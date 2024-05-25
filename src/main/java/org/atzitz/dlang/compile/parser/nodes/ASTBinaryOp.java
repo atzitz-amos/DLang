@@ -6,19 +6,19 @@ import org.atzitz.dlang.compile.Location;
 import java.util.Objects;
 
 @Getter
-public class ASTBinOp extends ASTNode {
+public class ASTBinaryOp extends ASTNode {
     protected final ASTNode left;
     protected final String op;
     protected final ASTNode right;
 
-    public ASTBinOp(ASTNode left, String op, ASTNode right, Location loc) {
+    public ASTBinaryOp(ASTNode left, String op, ASTNode right, Location loc) {
         super(Type.BinOp, loc);
         this.left = left;
         this.op = op;
         this.right = right;
     }
 
-    public ASTBinOp(ASTNode left, String op, ASTNode right, Type type, Location loc) {
+    public ASTBinaryOp(ASTNode left, String op, ASTNode right, Type type, Location loc) {
         super(type, loc);
         this.left = left;
         this.op = op;
