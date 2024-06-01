@@ -46,10 +46,8 @@ public class RuntimeHeap {
 
         for (i = x + 1; i < arr.length; i++) {
 
-            if (arr[i].isEmpty())
-                continue;
-
-            break;
+            if (!arr[i].isEmpty())
+                break;
         }
 
         if (i == arr.length) {

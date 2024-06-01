@@ -4,17 +4,17 @@ import lombok.Setter;
 
 @Setter
 public class BCBinOp extends AbstractBytecode {
-    public final String op;
+    public final String ops;
     public boolean flagged = false;
 
-    public BCBinOp(String op, int offset) {
+    public BCBinOp(String ops, int offset) {
         super(Type.BinOp, offset);
-        this.op = op;
+        this.ops = ops;
     }
 
     @Override
     public String toString() {
-        return STR."BCBinOp(op=\{op}; offset=\{offset});";
+        return STR."BCBinOp(ops=\{ops}; offset=\{offset});";
     }
 
 }

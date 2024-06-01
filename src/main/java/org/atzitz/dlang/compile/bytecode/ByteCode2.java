@@ -138,7 +138,7 @@ public class ByteCode2 {
         List<AbstractBytecode> res = generate(node.getBody());
         scope.unvisit();
 
-        if (res.getLast().type != AbstractBytecode.Type.LoadThis) {
+        if (res.getLast().type != AbstractBytecode.Type.Return) {
             res.add(new BCLoadConst(0, offset()));
             res.add(new BCReturn(offset()));
         }
@@ -189,8 +189,8 @@ public class ByteCode2 {
         int instrOffset = offset(); // Prepare the JumpIfFalse instruction
         Collection<AbstractBytecode> body = generate(node.getBody());
         if (node.getAlternative() != null) {
-            int instrOffset2 = offset(); // Prepare the Jump instruction
-            List<AbstractBytecode> alternative = generate(node.getAlternative());
+            int instrOffset2 = offset(); // Prepare the Jump instruction -> <-- 1; offset = 2;
+            List<AbstractBytecode> alternative = generate(node.getAlternative()); // offset = 6; => len(alternative) = 4
             return joining(expr, List.of(new BCJumpIfFalse(offset - alternative.size(), instrOffset)), body, List.of(new BCJump(offset, instrOffset2)), alternative);
         }
         return joining(expr, List.of(new BCJumpIfFalse(offset, instrOffset)), body);

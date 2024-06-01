@@ -3,18 +3,18 @@ package org.atzitz.dlang.compile.bytecode.bytecodes;
 import lombok.Setter;
 
 public class BCCompare extends AbstractBytecode {
-    public final String op;
+    public final String ops;
     @Setter
     public boolean flagged;
 
-    public BCCompare(String op, int offset) {
+    public BCCompare(String ops, int offset) {
         super(Type.Compare, offset);
-        this.op = op;
+        this.ops = ops;
     }
 
     @Override
     public String toString() {
-        return STR."BCCompare(op=\{op}; flagged=\{flagged}; offset=\{offset});";
+        return STR."BCCompare(ops=\{ops}; flagged=\{flagged}; offset=\{offset});";
     }
 
 }

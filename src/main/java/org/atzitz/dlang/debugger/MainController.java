@@ -75,10 +75,10 @@ public class MainController {
     private AbstractBytecode BCfromJson(JsonNode bc) {
         return switch (bc.get("type").asInt()) {
             case AbstractBytecode.Type.LoadThis -> new BCLoadThis(bc.get("offset").asInt());
-            case AbstractBytecode.Type.BinOp -> new BCBinOp(bc.get("op").asText(), bc.get("offset").asInt());
+            case AbstractBytecode.Type.BinOp -> new BCBinOp(bc.get("ops").asText(), bc.get("offset").asInt());
             case AbstractBytecode.Type.BuildCls ->
                     new BCBuildCls(bc.get("id").asInt(), bc.get("argc").asInt(), bc.get("localc").asInt(), bc.get("offset").asInt());
-            case AbstractBytecode.Type.Compare -> new BCCompare(bc.get("op").asText(), bc.get("offset").asInt());
+            case AbstractBytecode.Type.Compare -> new BCCompare(bc.get("ops").asText(), bc.get("offset").asInt());
             case AbstractBytecode.Type.ExchangeAssign -> {
                 int[] ids = new int[bc.get("size").asInt()];
                 int i = 0;

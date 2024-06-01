@@ -61,13 +61,13 @@ public class Exec {
         }
     }
 
-    private void saveState(int bc) {
+    private void saveState(int argc) {
         env.stack.push(env.mem.$LOCAL);
         env.stack.push(env.mem.$PARAM);
         env.stack.push(env.heap.$THIS);
         env.stack.push(env.pc.value);
 
-        env.mem.$PARAM = env.mem.$SP - 4 - bc;
+        env.mem.$PARAM = env.mem.$SP - 4 - argc;
         env.mem.$LOCAL = env.mem.$SP;
     }
 
@@ -116,7 +116,7 @@ public class Exec {
     private void execBinOp(BCBinOp bc) {
         final int TOS = env.stack.pop();
         final int TOS1 = env.stack.pop();
-        switch (bc.op) {
+        switch (bc.ops) {
             case "+" -> env.stack.push(TOS1 + TOS);
             case "-" -> env.stack.push(TOS1 - TOS);
             case "*" -> env.stack.push(TOS1 * TOS);
@@ -128,7 +128,7 @@ public class Exec {
     private void execCompareOp(BCCompare bc) {
         final int TOS = env.stack.pop();
         final int TOS1 = env.stack.pop();
-        switch (bc.op) {
+        switch (bc.ops) {
             case "==" -> env.stack.push(TOS1 == TOS ? 1 : 0);
             case ">" -> env.stack.push(TOS1 > TOS ? 1 : 0);
             case "<" -> env.stack.push(TOS1 < TOS ? 1 : 0);
