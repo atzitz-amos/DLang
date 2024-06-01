@@ -5,10 +5,10 @@
 #include <malloc.h>
 #include "memory.h"
 
-void DL_InitMemory() {
+void DL_InitMemory(int spoffset) {
     p_memory = malloc(MEMORY_SIZE * sizeof(int));
 
-    p_sp = 0;
+    p_sp = spoffset;
     p_local = 0;
     p_param = 0;
 }
@@ -46,15 +46,15 @@ int DL_StackPop() {
     return p_memory[--p_sp];
 }
 
-void DL_SetSP(int offset) {
+void DL_SetpSP(int offset) {
     p_sp = offset;
 }
 
-void DL_SetLocal(int offset) {
+void DL_SetpLocal(int offset) {
     p_local = offset;
 }
 
-void DL_SetParam(int offset) {
+void DL_SetpParam(int offset) {
     p_param = offset;
 }
 

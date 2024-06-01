@@ -11,7 +11,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 @Getter
 public class ByteCode_writer {
@@ -24,7 +23,7 @@ public class ByteCode_writer {
 
     private final ScopeVisitor scope;
 
-    private String lastInstruction = "";
+    private Instruction lastInstruction;
     private int offset = 0;
 
     private _Writer writer;
@@ -40,13 +39,11 @@ public class ByteCode_writer {
     public static void main(String[] args) {
         Parser parser = new Parser("""
                 int fib(int n) {
-                    if (n <= 1) {
-                        return n;
-                    }
+                    if (n <= 1) {return n;}
                     return fib(n - 1) + fib(n - 2);
                 }
                                 
-                int x = fib(2);
+                int x = fib(40);
                 """);
         parser.parse();
         System.out.println(parser.getProgram());
@@ -143,7 +140,7 @@ public class ByteCode_writer {
         scope.unvisit();
 
 
-        if (!Objects.equals(lastInstruction, Instruction.RET)) {
+        if (lastInstruction != Instruction.RET) {
             writer.instruction(offset(), Instruction.ICLD, 0);
             writer.instruction(offset(), Instruction.RET);
         }
@@ -422,7 +419,7 @@ public class ByteCode_writer {
             instructions.put(offset, sb.toString());
             comments.put(offset, comment);
 
-            bc.lastInstruction = instr.value;
+            bc.lastInstruction = instr;
         }
 
         public void writeToFile(String filename) throws IOException {
@@ -432,6 +429,8 @@ public class ByteCode_writer {
 
             writer.write("nglobals=");
             writer.write(STR."\{bc.scope.getRoot().getLocalObjects().size()}\n");
+            writer.write("globalsc=");
+            writer.write(STR."\{bc.scope.getRoot().getLocals().size()}\n");
 
             // Calculate the maximum length of the instruction strings
             int maxInstructionLength = instructions.values().stream().mapToInt(String::length).max().orElse(0);

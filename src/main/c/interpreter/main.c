@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 char *normalize_arg(char *str) {
     char *end;
@@ -102,6 +103,9 @@ struct instruction_memory load_bytecode_and_init_memory(char *filename) {
     fgets(buffer, sizeof(buffer), fptr);
     char *globaln = malloc(10 * sizeof(char));
     strncpy(globaln, buffer + 9, strlen(buffer) - 9);
+    fgets(buffer, sizeof(buffer), fptr);
+    char *globalc = malloc(10 * sizeof(char));
+    strncpy(globalc, buffer + 9, strlen(buffer) - 9);
 
     while (fgets(buffer, sizeof(buffer), fptr) != NULL) {
         if (++size > capacity) {
@@ -120,20 +124,25 @@ struct instruction_memory load_bytecode_and_init_memory(char *filename) {
 
     struct instruction_memory instr_memory = (struct instruction_memory) {size, ops};
 
-    DL_InitMemory();
+    DL_InitMemory(strtol(globalc, NULL, 10));
     DL_InitHeap();
     DL_HeapAllocAndPosition(strtol(globaln, NULL, 10));
 
     return instr_memory;
 }
 
-void interpret(struct instruction_memory instr_memory) {
+double interpret(struct instruction_memory instr_memory) {
+    clock_t start, end;
+
+    start = clock();
     while (instruct_pc_get() < instr_memory.size) {
         opcode_t op = instr_memory.ops[instruct_pc_get()];
         (*op.handlr)(&op);
 
         instruct_pc_incr();
     }
+    end = clock();
+    return ((double) (end - start)) / CLOCKS_PER_SEC;
 }
 
 void free_and_quit(struct instruction_memory memory) {
@@ -144,8 +153,12 @@ void free_and_quit(struct instruction_memory memory) {
 int main() {
     struct instruction_memory instr_memory = load_bytecode_and_init_memory(
             "C:\\Users\\amosa\\IdeaProjects\\DLang\\out.txt");
-    interpret(instr_memory);
+
+    double elapsed = interpret(instr_memory);
+
     printf("Result: %i\n", DL_MemorySeek(1));
+    printf("Elapsed time: %f\n", elapsed);
+
     free_and_quit(instr_memory);
     printf("Program finished\n");
     return 0;

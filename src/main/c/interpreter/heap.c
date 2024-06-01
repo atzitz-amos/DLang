@@ -26,16 +26,16 @@ static buddy_pair_t allocator_bucket_remove_first(buddy_bucket_t bucket) {
 }
 
 void DL_InitHeap() {
-    heap = malloc(HEAP_SIZE * sizeof(int));
-    allocator_buckets = malloc((HEAP_SIZE + 1) * sizeof(buddy_bucket_t));
-
     int x = ceil(log(HEAP_SIZE) / log(2));
+
+    heap = malloc(HEAP_SIZE * sizeof(int));
+    allocator_buckets = malloc((x + 1) * sizeof(buddy_bucket_t));
 
     for (int i = 0; i <= x; i++) {
         allocator_buckets[i] = (buddy_bucket_t) {0, 1, malloc(1 * sizeof(buddy_pair_t))};
     }
 
-    allocator_bucket_push(allocator_buckets, (buddy_pair_t) {0, HEAP_SIZE - 1});
+    allocator_bucket_push(allocator_buckets + x, (buddy_pair_t) {0, HEAP_SIZE - 1});
 
     p_this = 0;
 }
@@ -71,6 +71,7 @@ int DL_HeapGetRel(int offset) {
 }
 
 int DL_HeapAlloc(int size) {
+    int arr_size = ceil(log(HEAP_SIZE) / log(2)) + 1;
     int x = ceil(log(size) / log(2));
     int i;
     buddy_pair_t temp;
@@ -79,11 +80,11 @@ int DL_HeapAlloc(int size) {
         return allocator_bucket_remove_first(allocator_buckets[x]).lb;
     }
 
-    for (i = x + 1; i < sizeof(allocator_buckets); i++) {
+    for (i = x + 1; i < arr_size; i++) {
         if (allocator_buckets[i].size != 0)
             break;
     }
-    if (i == sizeof(allocator_buckets)) {
+    if (i == arr_size) {
         fprintf(stderr, "Error [OUT_OF_MEMORY]: Could not allocate memory\n");
         exit(1);
     }

@@ -16,7 +16,7 @@ static int p_sp;
 static int p_local;
 static int p_param;
 
-void DL_InitMemory();
+void DL_InitMemory(int spoffset);
 
 
 void DL_MemorySet(int index, int value);
@@ -39,11 +39,11 @@ void DL_StackPush(int value);
 int DL_StackPop();
 
 
-void DL_SetSP(int offset);
+void DL_SetpSP(int offset);
 
-void DL_SetLocal(int offset);
+void DL_SetpLocal(int offset);
 
-void DL_SetParam(int offset);
+void DL_SetpParam(int offset);
 
 int DL_GetpSP();
 

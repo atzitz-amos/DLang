@@ -9,13 +9,13 @@
 
 
 static void save_current_state(int argc) {
-    DL_StackPush(p_local);
-    DL_StackPush(p_param);
-    DL_StackPush(p_this);
+    DL_StackPush(DL_GetpLocal());
+    DL_StackPush(DL_GetpParam());
+    DL_StackPush(DL_GetpThis());
     DL_StackPush(instruct_pc_get());
 
-    p_param = p_sp - 4 - argc;
-    p_local = p_sp;
+    DL_SetpParam(DL_GetpSP() - 4 - argc);
+    DL_SetpLocal(DL_GetpSP());
 }
 
 void op_iadd(opcode_t *op) {
@@ -23,7 +23,9 @@ void op_iadd(opcode_t *op) {
 }
 
 void op_isub(opcode_t *op) {
-    DL_StackPush(-DL_StackPop() + DL_StackPop());
+    int a = -DL_StackPop();
+    int b = DL_StackPop();
+    DL_StackPush(a + b);
 }
 
 void op_imul(opcode_t *op) {
@@ -173,35 +175,35 @@ void op_falloc(opcode_t *op) {
 }
 
 void op_finit(opcode_t *op) {
-    p_sp += op->arg0;
+    DL_SetpSP(DL_GetpSP() + op->arg0);
 }
 
 void op_ret(opcode_t *op) {
     int retValue = DL_StackPop();
-    int param = p_param;
-    p_sp = p_local;
+    int param = DL_GetpParam();
+    DL_SetpSP(DL_GetpLocal());
 
     instruct_pc_jmp(DL_StackPop());
-    p_this = DL_StackPop();
-    p_param = DL_StackPop();
-    p_local = DL_StackPop();
+    DL_SetpThis(DL_StackPop());
+    DL_SetpParam(DL_StackPop());
+    DL_SetpLocal(DL_StackPop());
 
-    p_sp = param;
+    DL_SetpSP(param);
 
     DL_StackPush(retValue);
 }
 
 void op_retths(opcode_t *op) {
-    int retValue = p_this;
-    int param = p_param;
-    p_sp = p_local;
+    int retValue = DL_GetpThis();
+    int param = DL_GetpParam();
+    DL_SetpSP(DL_GetpLocal());
 
     instruct_pc_jmp(DL_StackPop());
-    p_this = DL_StackPop();
-    p_param = DL_StackPop();
-    p_local = DL_StackPop();
+    DL_SetpThis(DL_StackPop());
+    DL_SetpParam(DL_StackPop());
+    DL_SetpLocal(DL_StackPop());
 
-    p_sp = param;
+    DL_SetpSP(param);
 
     DL_StackPush(retValue);
 }
