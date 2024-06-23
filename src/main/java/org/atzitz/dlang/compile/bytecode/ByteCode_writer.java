@@ -43,7 +43,7 @@ public class ByteCode_writer {
                     return fib(n - 1) + fib(n - 2);
                 }
                                 
-                int x = fib(40);
+                int x = fib(35);
                 """);
         parser.parse();
         System.out.println(parser.getProgram());

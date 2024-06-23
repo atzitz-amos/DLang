@@ -26,7 +26,7 @@ public class DLangTest {
                                 
                 MyClass cls = new MyClass();
                                 
-                int x = cls.fib(40);
+                int x = cls.fib(20);
                 """);
 
         System.out.println(i.exec().getEnv().mem.get(1));

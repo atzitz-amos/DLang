@@ -1,0 +1,9 @@
+# ninja log v5
+27	76	0	clean	fa9917b023f8ae5d
+8	264	7391328350383683	CMakeFiles/DLang.dir/src/main/c/interpreter/opcode.c.obj	549984580f96b7a0
+45	285	7391328350593726	CMakeFiles/DLang.dir/src/main/c/interpreter/main.c.obj	7e6a7aee9aeca0c9
+286	533	7391328352982707	DLang.exe	b1ccfeb67a3873f6
+80	251	7391328350238501	CMakeFiles/DLang.dir/src/main/c/interpreter/instructions.c.obj	ec5f3c57c6d49730
+28	221	7391328349934384	CMakeFiles/DLang.dir/src/main/c/interpreter/memory.c.obj	726ebe7101ceb0c3
+4	401	7406727830159307	build.ninja	3e421555aa1ec299
+63	280	7391328350543678	CMakeFiles/DLang.dir/src/main/c/interpreter/heap.c.obj	77b3c48ed3d589b7

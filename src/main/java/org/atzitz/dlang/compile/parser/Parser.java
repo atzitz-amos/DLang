@@ -402,16 +402,11 @@ public class Parser {
     private ASTNode parseIdentifierGroup() {
         Token tok = seek();
         if (tok.type() == TokenType.ExclamationMark) {
-            eat(TokenType.SemiColon);
+            eat(TokenType.ExclamationMark);
             return new ASTUnaryOp("!", parseIdentifierGroup(), Location.of(tok.loc(), tokenizer.lookBehind().loc()));
         } else if (tok.type() == TokenType.Operator && Objects.equals(tok.value(), "-")) {
             eat(TokenType.Operator);
             return new ASTUnaryOp("-", parseIdentifierGroup(), Location.of(tok.loc(), tokenizer.lookBehind().loc()));
-        } else if (tok.type() == TokenType.OpenParen) {
-            eat(TokenType.OpenParen);
-            ASTNode node = parseExpr();
-            eat(TokenType.CloseParen);
-            return node;
         } else if (tok.type() == TokenType.OpenBracket) {
             return parseArray();
         } else if (tok.type() == TokenType.Keyword) {

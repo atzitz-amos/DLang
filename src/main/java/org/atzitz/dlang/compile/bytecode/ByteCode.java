@@ -1,11 +1,13 @@
 package org.atzitz.dlang.compile.bytecode;
 
 import lombok.Getter;
+import org.atzitz.dlang.DLang;
 import org.atzitz.dlang.compile.bytecode.bytecodes.*;
 import org.atzitz.dlang.compile.parser.Parser;
 import org.atzitz.dlang.compile.parser.ScopeVisitor;
 import org.atzitz.dlang.compile.parser.nodes.*;
 import org.atzitz.dlang.exceptions.compile.LangCompileTimeException;
+import org.atzitz.dlang.exec.ExecCompletionInfo;
 
 import java.util.*;
 import java.util.function.Function;
@@ -51,6 +53,17 @@ public class ByteCode {
         System.out.println(parser.getProgram());
         ByteCode bc = ByteCode.of(parser, "");
         System.out.println(bc);
+
+        ExecCompletionInfo i = DLang.exec("""
+                int fib(int n) {
+                    if (n <= 1) {return n;}
+                    return fib(n - 1) + fib(n - 2);
+                }
+                int x = fib(40);
+                """);
+
+        System.out.println(i.exec().getEnv().mem.get(1));
+        System.out.println(STR."\{i.executionTime()}ms");
     }
 
     public static ByteCode of(Parser parser, String raw) {

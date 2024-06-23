@@ -5,7 +5,7 @@
 #ifndef DLANG_INSTRUCTIONS_H
 #define DLANG_INSTRUCTIONS_H
 
-#include <opcode.h>
+#include "opcode.h"
 #include <stdio.h>
 
 // INSTRUCTIONS MEMORY

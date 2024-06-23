@@ -137,8 +137,123 @@ double interpret(struct instruction_memory instr_memory) {
     start = clock();
     while (instruct_pc_get() < instr_memory.size) {
         opcode_t op = instr_memory.ops[instruct_pc_get()];
-        (*op.handlr)(&op);
 
+        switch (op.opcode) {
+            case OPCODE_IADD:
+                op_iadd(op);
+                break;
+            case OPCODE_ISUB:
+                op_isub(op);
+                break;
+            case OPCODE_IMUL:
+                op_imul(op);
+                break;
+            case OPCODE_IDIV:
+                op_idiv(op);
+                break;
+            case OPCODE_IMOD:
+                op_imod(op);
+                break;
+            case OPCODE_INEG:
+                op_ineg(op);
+                break;
+            case OPCODE_BNEG:
+                op_bneg(op);
+                break;
+            case OPCODE_IGT:
+                op_igt(op);
+                break;
+            case OPCODE_ILT:
+                op_ilt(op);
+                break;
+            case OPCODE_IGE:
+                op_ige(op);
+                break;
+            case OPCODE_ILE:
+                op_ile(op);
+                break;
+            case OPCODE_INE:
+                op_ine(op);
+                break;
+            case OPCODE_IEQ:
+                op_ieq(op);
+                break;
+            case OPCODE_IINC:
+                op_iinc(op);
+                break;
+            case OPCODE_IDEC:
+                op_idec(op);
+                break;
+            case OPCODE_LLD:
+                op_lld(op);
+                break;
+            case OPCODE_PLD:
+                op_pld(op);
+                break;
+            case OPCODE_VLD:
+                op_vld(op);
+                break;
+            case OPCODE_RLD:
+                op_rld(op);
+                break;
+            case OPCODE_GLD:
+                op_gld(op);
+                break;
+            case OPCODE_STORL:
+                op_storl(op);
+                break;
+            case OPCODE_STORG:
+                op_storg(op);
+                break;
+            case OPCODE_STORV:
+                op_storv(op);
+                break;
+            case OPCODE_STORR:
+                op_storr(op);
+                break;
+            case OPCODE_ICLD:
+                op_icld(op);
+                break;
+            case OPCODE_BCLD:
+                op_bcld(op);
+                break;
+            case OPCODE_RCLD:
+                op_rcld(op);
+                break;
+            case OPCODE_INVK:
+                op_invk(op);
+                break;
+            case OPCODE_INVKREL:
+                op_invkrel(op);
+                break;
+            case OPCODE_INVKCLS:
+                op_invkcls(op);
+                break;
+            case OPCODE_JMP:
+                op_jmp(op);
+                break;
+            case OPCODE_JMPF:
+                op_jmpf(op);
+                break;
+            case OPCODE_JMPT:
+                op_jmpt(op);
+                break;
+            case OPCODE_FALLOC:
+                op_falloc(op);
+                break;
+            case OPCODE_FINIT:
+                op_finit(op);
+                break;
+            case OPCODE_RET:
+                op_ret(op);
+                break;
+            case OPCODE_RETTHS:
+                op_retths(op);
+                break;
+            default:
+                fprintf(stderr, "Error: Unknown opcode\n");
+                exit(1);
+        }
         instruct_pc_incr();
     }
     end = clock();
