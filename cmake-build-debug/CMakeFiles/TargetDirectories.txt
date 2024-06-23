@@ -1,0 +1,3 @@
+C:/Users/amosa/IdeaProjects/DLang/cmake-build-debug/CMakeFiles/DLang.dir
+C:/Users/amosa/IdeaProjects/DLang/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/amosa/IdeaProjects/DLang/cmake-build-debug/CMakeFiles/rebuild_cache.dir
